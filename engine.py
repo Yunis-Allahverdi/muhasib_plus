@@ -49,13 +49,14 @@ def prepare(rows, cols, side):
     for i, r in enumerate(rows, start=2):
         for k in cols:
             r[k] = str(r.get(k) or "").strip()
-        r.setdefault("item_description" if side == "portal" else "comment", "")
-        d = r["invoice_date" if side == "portal" else "doc_date"][:10]
+        is_portal = "invoice_date" in cols  # decide by columns, not by the label (app passes "e-taxes file")
+        r.setdefault("item_description" if is_portal else "comment", "")
+        d = r["invoice_date" if is_portal else "doc_date"][:10]
         try:
             date.fromisoformat(d)
         except ValueError:
             raise ValueError(f"{side} row {i}: date '{d}' is not YYYY-MM-DD")
-        r["invoice_date" if side == "portal" else "doc_date"] = d
+        r["invoice_date" if is_portal else "doc_date"] = d
         try:
             r["net"] = parse_amount(r["net_amount"])
             r["vat"] = parse_amount(r["vat_amount"])

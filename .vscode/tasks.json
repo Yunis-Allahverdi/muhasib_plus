@@ -1,0 +1,14 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "HesabAI: run app",
+      "type": "shell",
+      "command": "python -m streamlit run app.py --server.headless true",
+      "options": { "env": { "PYTHONIOENCODING": "utf-8" } },
+      "isBackground": true,
+      "problemMatcher": [],
+      "group": { "kind": "build", "isDefault": true }
+    }
+  ]
+}

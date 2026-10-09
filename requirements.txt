@@ -1,0 +1,8 @@
+pandas
+rapidfuzz
+streamlit
+openpyxl
+google-genai
+anthropic
+openai
+pytest

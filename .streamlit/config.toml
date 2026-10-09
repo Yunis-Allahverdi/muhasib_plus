@@ -1,0 +1,29 @@
+[server]
+# reload the app automatically every time a .py file is saved
+runOnSave = true
+port = 8501
+
+[browser]
+gatherUsageStats = false
+
+# MÜHASİB+ brand: navy text, teal primary, green accent (colours taken from the logo)
+[theme]
+base = "light"
+primaryColor = "#0E9F8E"
+backgroundColor = "#F5F9FA"
+secondaryBackgroundColor = "#E8F4F3"
+textColor = "#111A33"
+linkColor = "#0B7C8C"
+font = "Inter, 'Segoe UI', system-ui, sans-serif"
+headingFont = "Inter, 'Segoe UI', system-ui, sans-serif"
+headingFontWeights = [800, 700, 700, 600, 600, 600]
+baseRadius = "0.75rem"
+buttonRadius = "0.6rem"
+borderColor = "#D6E7E8"
+dataframeHeaderBackgroundColor = "#E3F2F1"
+showWidgetBorder = true
+chartCategoricalColors = ["#0E9F8E", "#10B981", "#0B7C8C", "#22D3EE", "#1E3A8A", "#F59E0B", "#EF4444"]
+
+[theme.sidebar]
+backgroundColor = "#EAF5F4"
+secondaryBackgroundColor = "#FFFFFF"

@@ -1,0 +1,10 @@
+case_type,1_exact,2_fuzzy,3_hybrid_llm
+amount_mismatch,6/28,24/28,26/28
+clean_easy,22/88,88/88,88/88
+clean_hard_alias,0/62,56/62,62/62
+duplicate_1c,14/30,30/30,30/30
+missing_in_1c,12/12,12/12,11/12
+missing_in_portal,6/6,6/6,6/6
+period_mismatch,6/10,10/10,10/10
+split,3/45,39/45,45/45
+voen_error,2/26,26/26,26/26

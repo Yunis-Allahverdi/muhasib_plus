@@ -2,3 +2,7 @@
 __pycache__/
 *.pyc
 .streamlit/secrets.toml
+
+# real client data: never upload (real company names and VÖENs)
+data_real/
+results_real/

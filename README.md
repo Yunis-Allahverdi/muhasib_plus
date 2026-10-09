@@ -2,7 +2,7 @@
 
 NeuroBridge Baku 2026 · AI Enterprise Solutions track
 
-> **Outcome:** on a labelled test month (307 records), the Excel-style lookup accountants use today handles **23%** of records correctly. HesabAI handles **99.0%** with AI, using 4 AI requests, against **94.8%** with rules alone, when 1C comments are typed the way accountants really type them. **No discrepancy is missed**, and the rules alone make **0 wrong pairings** on all 10 test months. Every finding comes with evidence and a confidence score, and nothing is final until an accountant approves it.
+> **Outcome:** on a **real company month**, HesabAI gets **96.6%** of records right (VLOOKUP: 24.1%), with **0 false alarms, 0 missed discrepancies and 0 wrong pairings**. On a labelled synthetic test month (307 records), the Excel-style lookup accountants use today handles **23%** of records correctly. HesabAI handles **99.0%** with AI, using 4 AI requests, against **94.8%** with rules alone, when 1C comments are typed the way accountants really type them. **No discrepancy is missed**, and the rules alone make **0 wrong pairings** on all 10 test months. Every finding comes with evidence and a confidence score, and nothing is final until an accountant approves it.
 
 ## 1. The problem and the value
 
@@ -120,6 +120,19 @@ Test month, seed 42, 307 records (`results/`, `results_realistic/`):
 - end-to-end regression on 3 seeds × easy/realistic: **0 wrong pairings, 0 missed discrepancies**, plus an accuracy floor.
 
 **Failures, honestly.** Every failed record per method is written to `results*/failures.csv` and shown in the app. The remaining rule failures are amount errors on records that have *both* an alias name and an internal 1C number, which is the AI's job. On the realistic data, some generic or blank comments leave a correct pairing unconfirmed, and both records are then reported as missing.
+
+**Real month: independent test, not tuned on.** A real September purchase month from an Azerbaijani company (28 e-invoices, 30 1C rows, 58 records). It was labelled by hand with a written reason per record, and checked against the accountant's own labels with 100% agreement. Each method was run once on it after the engine was finished; nothing was adjusted to fit it. The data stays private (`data_real/` is in `.gitignore`).
+
+| Real month | Exact (VLOOKUP) | Rules + fuzzy | **Hybrid (rules + AI)** |
+|---|---|---|---|
+| Record accuracy | 24.1% | 70.7% | **96.6%** |
+| False alarms | 30 | 9 | **0** |
+| Missed discrepancies | 0 | 0 | **0** |
+| Wrong pairings | 0 | 0 | **0** |
+| Alias names / splits / wrong period correct | 0/10 · 0/6 · 0/4 | 4/10 · 3/6 · 2/4 | **10/10 · 6/6 · 4/4** |
+| AI requests (11 invoices) | – | – | 3 ($0, Groq free tier) |
+
+Real data is much harder for the rules than our synthetic month (70.7% vs 94.8%). Suppliers appear as abbreviations (`BMA`), English (`Nasimi Print`, `Khazri Paper`), Cyrillic (`ФЛ Гусейнли Р.Т.`, `Шемахы Даш`) or split under a nickname. This is exactly where the AI step earns its place. The only miss: an English-named supplier with a mistyped amount, where the AI was not confident enough. Both records went to review instead of being guessed.
 
 ## 4. Feasibility
 

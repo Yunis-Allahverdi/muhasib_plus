@@ -2,7 +2,7 @@
 
 NeuroBridge Baku 2026 · AI Enterprise Solutions track
 
-**Live demo:** DEMO_LINK_HERE (opens in the browser, no setup and no API key needed: it runs on the synthetic demo month and reuses saved AI answers) · **Video:** VIDEO_LINK_HERE
+**Live demo:** [DEMO_LINK_HERE](https://muhasibplus.streamlit.app/) (opens in the browser, no setup and no API key needed: it runs on the synthetic demo month and reuses saved AI answers) · **Video:** VIDEO_LINK_HERE
 
 **Adoption metric:** no VAT discrepancy missed that a manual check would find, with at least 50% less review time. This is the success criterion of the pilot (§4).
 

@@ -1,4 +1,4 @@
-# HesabAI - demo app.  Run:  streamlit run app.py
+# MÜHASİB+ - demo app.  Run:  python -m streamlit run app.py
 import html
 import io
 import json
@@ -11,7 +11,7 @@ import streamlit as st
 import engine
 import llm
 
-st.set_page_config(page_title="HesabAI - VAT reconciliation", layout="wide")
+st.set_page_config(page_title="MÜHASİB+ - VAT reconciliation", layout="wide")
 
 # ---------------- look & feel (brand colours from the logo: navy / teal / green) ----------------
 st.markdown("""
@@ -256,7 +256,7 @@ with tab1:
     k[4].metric("VAT flagged, AZN", f"{vat_at_risk:,.0f}", help=f"Input VAT in flagged records: {vat_at_risk:,.2f} AZN")
     manual = (len(portal) + len(onec)) * min_per_record + len(issues) * min_per_issue
     tool = len(issues) * min_per_issue * 0.3
-    st.caption(f"Estimated manual effort ≈ {manual / 60:.1f} h vs ≈ {tool / 60:.1f} h reviewing HesabAI's evidence "
+    st.caption(f"Estimated manual effort ≈ {manual / 60:.1f} h vs ≈ {tool / 60:.1f} h reviewing MÜHASİB+'s evidence "
                f"(assumptions in sidebar; estimate, not a measured customer result).")
 
     st.subheader("Issues by type")

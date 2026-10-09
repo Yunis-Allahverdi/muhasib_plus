@@ -1,8 +1,23 @@
-# HesabAI – auditable VAT reconciliation (1C ↔ e-taxes)
+# MÜHASİB+ – auditable VAT reconciliation (1C ↔ e-taxes)
 
 NeuroBridge Baku 2026 · AI Enterprise Solutions track
 
-> **Outcome:** on a **real company month**, HesabAI gets **96.6%** of records right (VLOOKUP: 24.1%), with **0 false alarms, 0 missed discrepancies and 0 wrong pairings**. On a labelled synthetic test month (307 records), the Excel-style lookup accountants use today handles **23%** of records correctly. HesabAI handles **99.0%** with AI, using 4 AI requests, against **94.8%** with rules alone, when 1C comments are typed the way accountants really type them. **No discrepancy is missed**, and the rules alone make **0 wrong pairings** on all 10 test months. Every finding comes with evidence and a confidence score, and nothing is final until an accountant approves it.
+**Live demo:** DEMO_LINK_HERE (opens in the browser, no setup and no API key needed: it runs on the synthetic demo month and reuses saved AI answers) · **Video:** VIDEO_LINK_HERE
+
+**Adoption metric:** no VAT discrepancy missed that a manual check would find, with at least 50% less review time. This is the success criterion of the pilot (§4).
+
+**Results by dataset.** Record accuracy = share of records with the correct label *and* the correct partner record.
+
+| Dataset | Size | Exact (VLOOKUP) | Rules + fuzzy | **Hybrid (rules + AI)** |
+|---|---|---|---|---|
+| Synthetic month, realistic 1C comments (public, seed 42) | 307 records | 23.1% | 94.8% | **99.0%** |
+| Synthetic month, easy 1C comments (public, seed 42) | 307 records | 23.1% | 98.7% | **100%** |
+| Real company month (private, hand-labelled, §3) | 58 records | 24.1% | 70.7% | **96.6%** |
+
+- **Missed discrepancies: 0** for every method on all three datasets.
+- **Wrong pairings (hybrid):** 2 records on the realistic synthetic month (one wrong AI decision, explained in §2), 0 on the other two. Every AI pairing must be confirmed by the accountant.
+- Every finding comes with evidence and a confidence score, and nothing is final until an accountant approves it.
+- Everything in this repository is synthetic. The real month is used only as a private test set.
 
 ## 1. The problem and the value
 
@@ -14,16 +29,16 @@ Every month an Azerbaijani accountant checks incoming e-invoices from **e-taxes.
 
 Each miss costs money: VAT credit that is never claimed, credit that gets rejected, or credit claimed in the wrong period. Today this is done with VLOOKUP/SUMIF and by eye, which takes hours and fails exactly on the hard cases.
 
-**What HesabAI gives the accountant:** upload both exports → every record is paired or flagged with one of 6 labels (amount/VAT mismatch, VÖEN mismatch, wrong period, missing in 1C, missing in e-taxes, duplicate in 1C). Each finding carries its evidence, a confidence score and its VAT impact, plus an Azerbaijani explanation and a draft supplier email. The accountant approves, rejects or escalates each finding. **HesabAI never posts or sends anything.**
+**What MÜHASİB+ gives the accountant:** upload both exports → every record is paired or flagged with one of 6 labels (amount/VAT mismatch, VÖEN mismatch, wrong period, missing in 1C, missing in e-taxes, duplicate in 1C). Each finding carries its evidence, a confidence score and its VAT impact, plus an Azerbaijani explanation and a draft supplier email. The accountant approves, rejects or escalates each finding. **MÜHASİB+ never posts or sends anything.**
 
-On the synthetic test month (150 cases):
+On the synthetic test month: 150 generated test cases produce 144 e-invoices and 163 1C rows, i.e. 307 records.
 
 | | Value |
 |---|---|
 | Discrepancies found | 62 findings, **0 missed** |
 | Input VAT in flagged records | 187,554 AZN (of 443,108 AZN) |
 | Pairings the accountant must confirm (weak or AI evidence) | 17 |
-| Estimated effort | ≈ 18 h manual vs ≈ 4 h reviewing HesabAI's evidence\* |
+| Estimated effort | ≈ 18 h manual vs ≈ 4 h reviewing MÜHASİB+'s evidence\* |
 
 \* *Estimate from adjustable assumptions shown in the app (1.5 min per record and 10 min per issue manually; reviewing prepared evidence takes 30% of that). This is not a measured customer result. The synthetic month has a deliberately high error rate.*
 
@@ -76,18 +91,20 @@ Same test month (seed 42, 307 records), AI = Groq `openai/gpt-oss-120b` (free ti
 | AI requests (19 invoices, 5 per request) | – | – | 4 |
 
 **What the AI adds**: it resolves what no rule can, for example a translated supplier name with an internal 1C number and a mistyped amount. On realistic data it removes all 12 false alarms and fixes every alias case and split.
-**What it still gets wrong**: 1 pairing on the realistic month. A 1C row that really belongs to invoice P0136 (net mistyped as 1,852.43 instead of 852.43) was given to another invoice from the same supplier. It is labelled AMOUNT_MISMATCH and flagged for review, so the accountant sees it.
+**What it still gets wrong: one AI decision on the realistic month, which counts as 2 wrong-pairing records.** The 1C row C0155 really belongs to invoice P0136 (net mistyped as 1,852.43 instead of 852.43). The AI gave it to invoice P0037 from the same supplier (Atlas Mebel), with confidence 0.78. So P0037 and C0155 both have the wrong partner (2 records), and P0136 is reported as missing in 1C. All three records are still flagged as discrepancies, and the AI pairing needs the accountant's confirmation, so nothing is missed. It is still a real error, listed in `results_realistic/failures.csv`.
+
+*Metric definitions:* **record accuracy** = correct label and correct partner; **pairing accuracy** = records whose partner is correct; **wrong pairing** = a record linked to the wrong partner (one wrong decision usually affects 2 records); **missed discrepancy** = a real discrepancy labelled OK.
 
 **Two AI failures we found and fixed with deterministic guards** (each has a regression test):
 1. *First Gemini run*: the AI paired same-supplier records although the 1C row quoted a **different e-invoice number** → such rows are no longer offered to the AI (`doc_conflict`).
-2. *First Groq run (4 wrong pairings)*: the AI gave the two halves of one split invoice to two other invoices → when two free 1C rows add up exactly to an invoice, the AI is told so and those rows are **reserved** for it (`exact_split`). Realistic accuracy went 98.4% → 99.0%, and wrong pairings 4 → 2.
+2. *First Groq run (4 wrong pairings)*: the AI gave the two halves of one split invoice to two other invoices → when two free 1C rows add up exactly to an invoice, the AI is told so and those rows are **reserved** for it (`exact_split`). Realistic accuracy went 98.4% → 99.0%, and wrong-pairing records 4 → 2 (two wrong AI decisions → one).
 
 An earlier unbatched run with Gemini (`gemini-3.6-flash`) on the easy month reached 99.3% with 0 wrong pairings, before its free daily quota ran out.
 <!-- /HYBRID_RESULTS -->
 
 ## 3. Quality testing
 
-**Comparison with the current approach.** The baseline is what an accountant does in Excel: VLOOKUP on the invoice number.
+**Comparison with the current approach.** Today an accountant does VLOOKUP on the invoice number in Excel, then checks everything VLOOKUP could not match by eye. The table measures only the VLOOKUP step, to show how much is left for the eye. That manual part is what the ≈ 18 h estimate in §1 represents.
 
 Test month, seed 42, 307 records (`results/`, `results_realistic/`):
 
@@ -121,7 +138,7 @@ Test month, seed 42, 307 records (`results/`, `results_realistic/`):
 
 **Failures, honestly.** Every failed record per method is written to `results*/failures.csv` and shown in the app. The remaining rule failures are amount errors on records that have *both* an alias name and an internal 1C number, which is the AI's job. On the realistic data, some generic or blank comments leave a correct pairing unconfirmed, and both records are then reported as missing.
 
-**Real month: independent test, not tuned on.** A real September purchase month from an Azerbaijani company (28 e-invoices, 30 1C rows, 58 records). It was labelled by hand with a written reason per record, and checked against the accountant's own labels with 100% agreement. Each method was run once on it after the engine was finished; nothing was adjusted to fit it. The data stays private (`data_real/` is in `.gitignore`).
+**Real month: independent test, not tuned on.** This is the only real data used in the project; everything in the repository is synthetic. A real September purchase month from an Azerbaijani company (28 e-invoices, 30 1C rows, 58 records). It was labelled by hand with a written reason per record, and checked against the accountant's own labels with 100% agreement. Each method was run once on it after the engine was finished; nothing was adjusted to fit it. The data stays private (`data_real/` is in `.gitignore`).
 
 | Real month | Exact (VLOOKUP) | Rules + fuzzy | **Hybrid (rules + AI)** |
 |---|---|---|---|
@@ -162,7 +179,7 @@ Claude figures exclude thinking tokens, which can add a multiple of the output c
 4. Tune thresholds on that month and freeze them.
 5. Re-measure on the next month.
 
-Success criterion: no discrepancy missed that the manual check found, and at least 50% less review time.
+**Adoption metric (pilot success criterion):** no discrepancy missed that the manual check found, and at least 50% less review time.
 
 ## 5. What is different
 
@@ -173,10 +190,15 @@ Success criterion: no discrepancy missed that the manual check found, and at lea
 
 ## Run
 
+**Without any API key:** `pip install -r requirements.txt` then `python -m streamlit run app.py`. The demo month and the saved AI answers in `llm_cache.json` work offline.
+
+**With your own AI key** (needed only for new AI requests):
+
+1. Copy `.env.example` to a new file called `.env` in the same folder (Windows: `copy .env.example .env`; Mac/Linux: `cp .env.example .env`).
+2. Open `.env` and paste a key for **one** provider (the file explains each). The reported results used a free Groq key with `openai/gpt-oss-120b`.
+
 ```bash
 pip install -r requirements.txt
-# AI key: open .env (next to app.py) and paste a free Groq key after OPENAI_API_KEY=
-#   (or GEMINI_API_KEY / ANTHROPIC_API_KEY; only one provider should be active)
 python test_key.py                                        # checks the key works
 python generate_data.py 42 150 data                       # labelled test month
 python generate_data.py 42 150 data_realistic --realistic # same month, realistic 1C comments
@@ -193,16 +215,16 @@ Add `--no-llm` to `evaluate.py` to run only the two non-AI methods.
 
 ## Limitations
 
-- Data is synthetic. Real 1C export layouts and real error frequencies must be validated in the pilot.
+- Public data is synthetic. The only real validation is one private month (58 records). Real 1C export layouts and real error frequencies must be validated in the pilot.
 - One error per case in the test set; real records can have several at once.
 - Time-saving figures are assumption-based estimates, not measurements.
 - The LLM can still pair wrongly within its candidate set. That is why AI pairings always need confirmation and every pairing shows its evidence.
 - Free tiers (Groq, Gemini) are rate-limited, and Gemini's daily quota is small. A production pilot needs a paid tier or Claude Haiku/Sonnet.
-- The AI results come from one test month and one model; repeating them across seeds costs AI requests and is the next validation step.
+- The AI results come from one synthetic month (two comment styles), one real month and one model. Repeating them across seeds costs AI requests and is the next validation step.
 
 ## Disclosure
 
 - Models: Groq `openai/gpt-oss-120b` (used for the reported AI results; any OpenAI-compatible service via `OPENAI_BASE_URL`), Gemini flash (Google, picked automatically or via `HESAB_GEMINI_MODEL`), Claude (Anthropic API, default `claude-sonnet-5-5`, via `HESAB_CLAUDE_MODEL`) or GPT (OpenAI API, default `gpt-4.1-mini`, via `HESAB_OPENAI_MODEL`).
 - Libraries: Python, pandas, rapidfuzz, streamlit, openpyxl, google-genai, anthropic, openai, pytest.
-- Data: fully synthetic, generated by `generate_data.py`. No real company or client data.
-- Built during the hackathon (9 Oct 2026) with help from AI coding assistants.
+- Data: everything in this repository is synthetic, generated by `generate_data.py`. One real company month (58 records) was used privately, only as the test set in §3. It is not published (`data_real/` is in `.gitignore`).
+- Built during the hackathon: all code was written after the start on 9 Oct 2026, with help from AI coding assistants. Only research on the problem and tools was done beforehand.

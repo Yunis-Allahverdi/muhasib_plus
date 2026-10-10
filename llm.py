@@ -291,5 +291,5 @@ def explain(label, evidence, portal_txt, onec_txt):
     p = EXPLAIN_PROMPT.format(label=label, evidence="; ".join(evidence), portal=portal_txt or "-", onec=onec_txt or "-")
     try:
         return parse_json(complete(p, 700)) or {"explanation": "(AI cavabı oxunmadı)", "email_subject": "", "email_body": ""}
-    except Exception as e:
-        return {"explanation": f"(AI izahı alınmadı: {e})", "email_subject": "", "email_body": ""}
+    except Exception:
+        return None

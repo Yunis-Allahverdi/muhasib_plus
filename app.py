@@ -155,11 +155,7 @@ min_conf = st.sidebar.slider("AI confidence needed to auto-pair", 0.5, 0.95, 0.6
 st.sidebar.markdown("**Time-saving assumptions** (estimates, not measured)")
 min_per_record = st.sidebar.number_input("Manual minutes per record", 0.5, 10.0, 1.5, 0.5)
 min_per_issue = st.sidebar.number_input("Manual minutes to investigate one issue", 1.0, 60.0, 10.0, 1.0)
-if llm.provider() is None:
-    st.sidebar.warning("No AI key found. Paste your key into the .env file next to app.py "
-                       "(OPENAI_API_KEY=... for Groq, or GEMINI_API_KEY=...) and restart the app. "
-                       "Until then AI steps use cached answers only.")
-else:
+if llm.provider() is not None:
     st.sidebar.success(f"AI provider: {llm.provider()}")
     st.sidebar.caption(f"Quota protection: {os.environ.get('HESAB_LLM_BATCH') or 5} invoices per AI request, "
                        f"max {llm.MAX_CALLS or '∞'} requests per app start; answers are cached. "

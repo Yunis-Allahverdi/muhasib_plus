@@ -151,10 +151,9 @@ else:
     portal, onec = engine.load_csv(f"{d}/portal.csv"), engine.load_csv(f"{d}/onec.csv")
 
 method = st.sidebar.selectbox("Method", ["Hybrid (rules + fuzzy + AI)", "Rules + fuzzy (no AI)", "Exact match (VLOOKUP baseline)"])
-min_conf = st.sidebar.slider("AI confidence needed to auto-pair", 0.5, 0.95, 0.6, 0.05)
-st.sidebar.markdown("**Time-saving assumptions** (estimates, not measured)")
-min_per_record = st.sidebar.number_input("Manual minutes per record", 0.5, 10.0, 1.5, 0.5)
-min_per_issue = st.sidebar.number_input("Manual minutes to investigate one issue", 1.0, 60.0, 10.0, 1.0)
+min_conf = 0.6
+min_per_record = 1.5
+min_per_issue = 10.0
 if llm.provider() is not None:
     st.sidebar.success(f"AI provider: {llm.provider()}")
     st.sidebar.caption(f"Quota protection: {os.environ.get('HESAB_LLM_BATCH') or 5} invoices per AI request, "

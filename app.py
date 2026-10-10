@@ -368,8 +368,7 @@ with tab3:
                 ("false_alarms", "False alarms", "{:.0f}"), ("missed_discrepancies", "Missed discrepancies", "{:.0f}"),
                 ("wrong_pairings", "Wrong pairings", "{:.0f}"), ("flagged_for_review", "Flagged for review", "{:.0f}"),
                 ("seconds", "Runtime, s", "{:.2f}"), ("llm_model", "AI model", "{}"), ("llm_calls", "AI requests", "{:.0f}"),
-                ("llm_errors", "AI errors", "{:.0f}"), ("llm_in_tokens", "AI tokens in", "{:,.0f}"),
-                ("llm_out_tokens", "AI tokens out", "{:,.0f}"), ("llm_cost_usd", "AI cost, USD", "{:.4f}")]
+                ("llm_errors", "AI errors", "{:.0f}")]
 
         def fmt(v, f):
             return "–" if v is None or (isinstance(v, float) and pd.isna(v)) else f.format(v)
